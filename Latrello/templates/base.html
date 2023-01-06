@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/all2.css' %}">
+    <title>LATRELLO</title>
+</head>
+<body>
+<div class="count">
+    <h3>Счётчик сессии - {{ count }}</h3>
+</div>
+<div class="header">
+    {% block header %}
+        {% if user.is_authenticated %}
+            <div><a href="{% url 'index' %}">Home</a></div>
+            <div><a href="{% url 'logout' %}">Logout</a></div>
+            <div><a href="{% url 'cards' %}">My Cards</a></div>
+{#            <div><a href="{% url 'index' %}">Returns purchases</a></div>#}
+
+            <div>
+                <h4>
+                    {% if not user.is_superuser %}
+                        {{ user }}<br>
+                    {% else %}
+                        {{ user }}<br>
+                        ADMIN
+                    {% endif %}
+                </h4>
+            </div>
+
+        {% else %}
+            <div><a href="{% url 'index' %}">Home</a></div>
+            <div><a href="{% url 'login' %}">Log In</a></div>
+            <div><a href="{% url 'register' %}">Sign up</a></div>
+
+            <div><h4>Guest</h4></div>
+        {%  endif %}
+        </div>
+    {% endblock %}
+</div>
+<div class="content">
+   {% block content %}
+    {% endblock %}
+</div>
+
+</body>
+</html>

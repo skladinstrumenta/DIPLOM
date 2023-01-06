@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% block content %}
+    <form method="post" action="{% url 'createcard' %}">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <input type="submit" value="Create">
+    </form>
+    <div class="product">
+            {% for obj in object_list %}
+                <div class="object_product">
+                    <div class="product_description">
+                        <h3>{{ obj.text }}</h3>
+                        {% if user.is_authenticated %}
+                            <form method="get" action="{% url 'updatecard' obj.id %}">
+                                {% csrf_token %}
+
+                                <button type="submit">Update</button>
+                            </form>
+                        {% endif %}
+                    </div>
+                </div><br>
+            {% endfor %}
+    {#        <div>#}
+    {#        <span class="step-links">#}
+    {#            {% if page_obj.has_previous %}#}
+    {#                <a href="?page=1">&laquo; first</a>#}
+    {#                <a href="?page={{ page_obj.previous_page_number }}">previous</a>#}
+    {#            {% endif %}#}
+    {##}
+    {#            <span class="current">#}
+    {#                Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.#}
+    {#            </span>#}
+    {##}
+    {#            {% if page_obj.has_next %}#}
+    {#                <a href="?page={{ page_obj.next_page_number }}">next</a>#}
+    {#                <a href="?page={{ page_obj.paginator.num_pages }}">last &raquo;</a>#}
+    {#            {% endif %}#}
+    {#            </span>#}
+    {#        </div>#}
+            <br>
+    </div>
+{% endblock %}
