@@ -13,9 +13,15 @@
                         {% if user.is_authenticated %}
                             <form method="get" action="{% url 'updatecard' obj.id %}">
                                 {% csrf_token %}
-
                                 <button type="submit">Update</button>
                             </form>
+                            {% if user.is_superuser %}
+                                <form method="Post" action="{% url 'deletecard' obj.id %}">
+                                    {% csrf_token %}
+                                    <button type="submit">Delete</button>
+                                </form>
+                            {% endif %}
+
                         {% endif %}
                     </div>
                 </div><br>

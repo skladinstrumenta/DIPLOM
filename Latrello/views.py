@@ -3,25 +3,24 @@ from datetime import timezone, datetime
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import render
-from django.views.generic import CreateView, ListView, UpdateView
+from django.views.generic import CreateView, ListView, UpdateView, DeleteView, TemplateView
 
-from Latrello.forms import CreateUserForm, CardCreateForm
+from Latrello.forms import CreateUserForm, CardCreateForm, CardUpdateForm
 from Latrello.models import Card
 
 
-# class ProductListView(ListView):
-#     model = Product
-#     template_name = 'index.html'
+# def index(request):
+#     session_count = 0
+#     if request.user.is_authenticated:
+#         session_count = request.session.get('session_count', 1)
+#         request.session['session_count'] = session_count + 1
+#         # if not request.user.is_superuser:
+#         #     request.session.set_expiry(60)
+#     return render(request, 'index.html', context={'count': session_count})
 
 
-def index(request):
-    session_count = 0
-    if request.user.is_authenticated:
-        session_count = request.session.get('session_count', 1)
-        request.session['session_count'] = session_count + 1
-        if not request.user.is_superuser:
-            request.session.set_expiry(60)
-    return render(request, 'index.html', context={'count': session_count})
+class HomePageView(TemplateView):
+    template_name = 'index.html'
 
 
 class CreateNewUserView(CreateView):
@@ -43,16 +42,12 @@ class CardListView(ListView):
     template_name = 'cards.html'
     extra_context = {'form': CardCreateForm}
 
-
-    #
-    # def get(self, request):
-    #     session_count = 0
-    #     if request.user.is_authenticated:
-    #         session_count = request.session.get('session_count', 1)
-    #         request.session['session_count'] = session_count + 1
-    #         if not request.user.is_superuser:
-    #             request.session.set_expiry(60)
-    #     return render(request, 'index.html', context={'count': session_count})
+    def get_queryset(self):
+        if not self.request.user.is_superuser:
+            queryset = Card.objects.filter(author=self.request.user)
+            return queryset
+        queryset = Card.objects.all()
+        return queryset
 
 
 class CardCreateView(CreateView):
@@ -70,7 +65,15 @@ class CardCreateView(CreateView):
 
 class CardUpdateView(UpdateView):
     model = Card
-    fields = ['text', 'executor']
-    template_name = 'cards.html'
+    form_class = CardUpdateForm
+    template_name = 'updatecard.html'
     success_url = '/cards'
 
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs.update({'user': self.request.user})
+        return kwargs
+
+class CardDeleteView(DeleteView):
+    model = Card
+    success_url = '/cards'
