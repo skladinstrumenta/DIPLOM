@@ -1,11 +1,11 @@
 {% extends 'base.html' %}
 {% block content %}
-    <form method="post" action="{% url 'createcard' %}">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <input type="submit" value="Create">
-    </form>
     <div class="product">
+        <form method="post" action="{% url 'createcard' %}">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit">Create</button>
+        </form>
             {% for obj in object_list %}
                 <div class="object_product">
                     <div class="product_description">
@@ -15,6 +15,18 @@
                                 {% csrf_token %}
                                 <button type="submit">Update</button>
                             </form>
+                            {% if obj.status > 1 %}
+                                <a href="">Шаг назад</a>
+                                {{ obj.status }}
+                            {% else %}
+{#                                <a href="{% url 'status_up' obj.id %}">Шаг вперед</a>#}
+{#                                <h3>Статус еще NEW</h3>#}
+                                <form method="post" action="{% url 'status_up' obj.id %}">
+                                    {% csrf_token %}
+                                    <button type="submit">next status</button>
+                                </form>
+                            {% endif %}
+
                             {% if user.is_superuser %}
                                 <form method="Post" action="{% url 'deletecard' obj.id %}">
                                     {% csrf_token %}

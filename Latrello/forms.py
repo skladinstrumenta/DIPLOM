@@ -31,13 +31,13 @@ class CardCreateForm(forms.ModelForm):
 
 
 class CardUpdateForm(forms.ModelForm):
-    executor = forms.ModelChoiceField(queryset=User.objects.all()) #.all()-->.none() --->>41-42 not#
+    executor = forms.ModelChoiceField(queryset=User.objects.all(), blank=True, required=False, label='Исполнитель') #.all()-->.none() --->>41-42 not#
 
     def __init__(self, *args, **kwargs):
-        userb = kwargs.pop('user', None)
+        user = kwargs.pop('user', None)
         super(CardUpdateForm, self).__init__(*args, **kwargs)
-        if userb and userb.is_authenticated and not userb.is_superuser:
-            self.fields['executor'].queryset = User.objects.filter(id=userb.id)
+        if user and user.is_authenticated and not user.is_superuser:
+            self.fields['executor'].queryset = User.objects.filter(id=user.id)
         # else:
         #     self.fields['executor'].queryset = User.objects.all()
 
@@ -46,11 +46,6 @@ class CardUpdateForm(forms.ModelForm):
         model = Card
         fields = ['text', 'executor']
 
-
-#     def get_form_kwargs(self):
-#         kwargs = super().get_form_kwargs()
-#         kwargs.update({'request': self.request})
-#         return kwargs
 
 
 
