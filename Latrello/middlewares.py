@@ -1,6 +1,8 @@
 from django.utils.deprecation import MiddlewareMixin
 
+
 class AuthenticationMiddleware(MiddlewareMixin):
+
     def process_request(self, request):
         session_count = 0
         if request.user.is_authenticated:

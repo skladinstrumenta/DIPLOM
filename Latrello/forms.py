@@ -2,6 +2,7 @@ from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 from django import forms
 from django.core.exceptions import ValidationError
+from django.db.models import F
 
 from Latrello.models import Card
 
@@ -47,5 +48,49 @@ class CardUpdateForm(forms.ModelForm):
         fields = ['text', 'executor']
 
 
+class CardStatusUpForm(forms.ModelForm):
+
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop('user', None)
+        super(CardStatusUpForm, self).__init__(*args, **kwargs)
+
+    class Meta:
+        model = Card
+        fields = ()
+
+    def save(self, commit=True):
+        instance = super().save(commit=False)
+        user = self.user
+        if user and user.is_authenticated and \
+           (not user.is_superuser and instance.author == instance.executor and instance.status < 4 or
+            user.is_superuser and instance.status == 4):
+            instance.status = F('status') + 1
+        if commit:
+            instance.save()
+            self.save_m2m()
+        return instance
+
+
+class CardStatusDownForm(forms.ModelForm):
+
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop('user', None)
+        super(CardStatusDownForm, self).__init__(*args, **kwargs)
+
+    class Meta:
+        model = Card
+        fields = ()
+
+    def save(self, commit=True):
+        instance = super().save(commit=False)
+        user = self.user
+        if user and user.is_authenticated and \
+                (not user.is_superuser and instance.author == instance.executor and \
+                 instance.status > 1 and instance.status != 5 or user.is_superuser and instance.status == 5):
+            instance.status = F('status') - 1
+        if commit:
+            instance.save()
+            self.save_m2m()
+        return instance
 
 

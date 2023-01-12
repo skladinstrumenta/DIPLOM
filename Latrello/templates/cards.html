@@ -10,20 +10,23 @@
                 <div class="object_product">
                     <div class="product_description">
                         <h3>{{ obj.text }}</h3>
+                        <h5>Последнее обновление было - {{ obj.date_update }} {{ obj.id }}</h5>
                         {% if user.is_authenticated %}
                             <form method="get" action="{% url 'updatecard' obj.id %}">
                                 {% csrf_token %}
                                 <button type="submit">Update</button>
                             </form>
-                            {% if obj.status > 1 %}
-                                <a href="">Шаг назад</a>
-                                {{ obj.status }}
-                            {% else %}
-{#                                <a href="{% url 'status_up' obj.id %}">Шаг вперед</a>#}
-{#                                <h3>Статус еще NEW</h3>#}
+                            {% if not user.is_superuser and obj.status > 1 or user.is_superuser and obj.status == 5 %}
+                                <form method="post" action="{% url 'status_down' obj.id %}">
+                                    {% csrf_token %}
+                                    <button type="submit">status DOWN</button>
+                                </form>
+                            {% endif %}
+                                <h3>STATUS NOW - {{ obj.status }}</h3>
+                            {% if obj.status < 4 or user.is_superuser and obj.status == 4%}
                                 <form method="post" action="{% url 'status_up' obj.id %}">
                                     {% csrf_token %}
-                                    <button type="submit">next status</button>
+                                    <button type="submit">status UP</button>
                                 </form>
                             {% endif %}
 
@@ -33,28 +36,10 @@
                                     <button type="submit">Delete</button>
                                 </form>
                             {% endif %}
-
                         {% endif %}
                     </div>
                 </div><br>
             {% endfor %}
-    {#        <div>#}
-    {#        <span class="step-links">#}
-    {#            {% if page_obj.has_previous %}#}
-    {#                <a href="?page=1">&laquo; first</a>#}
-    {#                <a href="?page={{ page_obj.previous_page_number }}">previous</a>#}
-    {#            {% endif %}#}
-    {##}
-    {#            <span class="current">#}
-    {#                Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.#}
-    {#            </span>#}
-    {##}
-    {#            {% if page_obj.has_next %}#}
-    {#                <a href="?page={{ page_obj.next_page_number }}">next</a>#}
-    {#                <a href="?page={{ page_obj.paginator.num_pages }}">last &raquo;</a>#}
-    {#            {% endif %}#}
-    {#            </span>#}
-    {#        </div>#}
             <br>
     </div>
 {% endblock %}

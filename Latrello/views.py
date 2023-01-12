@@ -1,29 +1,31 @@
-from datetime import timezone, datetime
-
 from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.db.models import F
-from django.http import HttpResponseRedirect
-from django.shortcuts import render
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.shortcuts import redirect
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, ListView, UpdateView, DeleteView, TemplateView
 
-from Latrello.forms import CreateUserForm, CardCreateForm, CardUpdateForm
+from Latrello.forms import CreateUserForm, CardCreateForm, CardUpdateForm, CardStatusUpForm, CardStatusDownForm
 from Latrello.models import Card
 
 
-# def index(request):
-#     session_count = 0
-#     if request.user.is_authenticated:
-#         session_count = request.session.get('session_count', 1)
-#         request.session['session_count'] = session_count + 1
-#         # if not request.user.is_superuser:
-#         #     request.session.set_expiry(60)
-#     return render(request, 'index.html', context={'count': session_count})
+class SuperUserRequiredMixin(UserPassesTestMixin):
+
+    def test_func(self):
+        return self.request.user.is_superuser
+
+    def handle_no_permission(self):
+        return redirect('home')
+
+
+class AddRequestInFormMixin:
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs.update({'user': self.request.user})
+        return kwargs
 
 
 class HomePageView(TemplateView):
-    template_name = 'index.html'
+    template_name = 'home.html'
 
 
 class CreateNewUserView(CreateView):
@@ -67,33 +69,28 @@ class CardCreateView(CreateView):
         return super().form_valid(form)
 
 
-class CardUpdateView(UpdateView):
+class CardDeleteView(SuperUserRequiredMixin, DeleteView):
+    model = Card
+    success_url = reverse_lazy('cards')
+
+
+class CardUpdateView(LoginRequiredMixin, AddRequestInFormMixin, UpdateView):
     model = Card
     form_class = CardUpdateForm
     template_name = 'updatecard.html'
     success_url = '/cards'
 
-    def get_form_kwargs(self):
-        kwargs = super().get_form_kwargs()
-        kwargs.update({'user': self.request.user})
-        return kwargs
 
-class CardDeleteView(DeleteView):
-    model = Card
-    success_url = '/cards'
-
-
-class StatusUpView(UpdateView):
+class StatusUpView(LoginRequiredMixin, AddRequestInFormMixin, UpdateView):
     model = Card
     success_url = reverse_lazy('cards')
-    fields = ['status']
+    form_class = CardStatusUpForm
     template_name = 'cards.html'
 
-    def form_valid(self, form):
-        obj = self.get_object()
-        obj.update(status=F('status') + 1)
-        return super().form_valid(form)
 
+class StatusDownView(LoginRequiredMixin, AddRequestInFormMixin, UpdateView):
+    model = Card
+    success_url = reverse_lazy('cards')
+    form_class = CardStatusDownForm
+    template_name = 'cards.html'
 
-class StatusBackView(UpdateView):
-    pass

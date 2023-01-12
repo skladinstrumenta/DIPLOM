@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 {% block content %}
-<span>Wanna register? <a href="{% url 'index' %}">Sign Up</a></span>
+<span>Wanna register? <a href="{% url 'home' %}">Sign Up</a></span>
 
 <form method="post">
     {% csrf_token %}

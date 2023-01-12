@@ -13,10 +13,9 @@
 <div class="header">
     {% block header %}
         {% if user.is_authenticated %}
-            <div><a href="{% url 'index' %}">Home</a></div>
+            <div><a href="{% url 'home' %}">Home</a></div>
             <div><a href="{% url 'logout' %}">Logout</a></div>
             <div><a href="{% url 'cards' %}">My Cards</a></div>
-{#            <div><a href="{% url 'index' %}">Returns purchases</a></div>#}
 
             <div>
                 <h4>
@@ -30,7 +29,7 @@
             </div>
 
         {% else %}
-            <div><a href="{% url 'index' %}">Home</a></div>
+            <div><a href="{% url 'home' %}">Home</a></div>
             <div><a href="{% url 'login' %}">Log In</a></div>
             <div><a href="{% url 'register' %}">Sign up</a></div>
 
