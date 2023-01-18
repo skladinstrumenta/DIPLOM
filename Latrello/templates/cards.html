@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% block content %}
     <div class="product">
-        <form method="post" action="{% url 'createcard' %}">
+        <form method="post" action="{% url 'createcard' %}" class="create_card_text">
             {% csrf_token %}
             {{ form.as_p }}
             <button type="submit">Create</button>
@@ -12,24 +12,23 @@
                         <h3>{{ obj.text }}</h3>
                         <h5>Последнее обновление было - {{ obj.date_update }} {{ obj.id }}</h5>
                         {% if user.is_authenticated %}
-                            <form method="get" action="{% url 'updatecard' obj.id %}">
+                            <form method="get" action="{% url 'updatecard' obj.id %}" class="update_button">
                                 {% csrf_token %}
                                 <button type="submit">Update</button>
                             </form>
-                            {% if not user.is_superuser and obj.status > 1 or user.is_superuser and obj.status == 5 %}
+                            {% if not user.is_superuser and obj.status > 1 and obj.status != 5 or user.is_superuser and obj.status == 5 %}
                                 <form method="post" action="{% url 'status_down' obj.id %}">
                                     {% csrf_token %}
-                                    <button type="submit">status DOWN</button>
+                                    <button type="submit">STATUS DOWN</button>
                                 </form>
                             {% endif %}
-                                <h3>STATUS NOW - {{ obj.status }}</h3>
-                            {% if obj.status < 4 or user.is_superuser and obj.status == 4%}
+                            {% if not user.is_superuser and obj.status < 4 or user.is_superuser and obj.status == 4%}
                                 <form method="post" action="{% url 'status_up' obj.id %}">
                                     {% csrf_token %}
-                                    <button type="submit">status UP</button>
+                                    <button type="submit">STATUS UP</button>
                                 </form>
                             {% endif %}
-
+                            <h3>STATUS NOW - {{ obj.status }}</h3>
                             {% if user.is_superuser %}
                                 <form method="Post" action="{% url 'deletecard' obj.id %}">
                                     {% csrf_token %}

@@ -17,7 +17,7 @@ class SuperUserRequiredMixin(UserPassesTestMixin):
         return redirect('home')
 
 
-class AddRequestInFormMixin(UpdateView):
+class AddUserInFormMixin(UpdateView):
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
         kwargs.update({'user': self.request.user})
@@ -74,21 +74,21 @@ class CardDeleteView(SuperUserRequiredMixin, DeleteView):
     success_url = reverse_lazy('cards')
 
 
-class CardUpdateView(LoginRequiredMixin, AddRequestInFormMixin):
+class CardUpdateView(LoginRequiredMixin, AddUserInFormMixin):
     model = Card
     form_class = CardUpdateForm
     template_name = 'updatecard.html'
     success_url = '/cards'
 
 
-class StatusUpView(LoginRequiredMixin, AddRequestInFormMixin):
+class StatusUpView(LoginRequiredMixin, AddUserInFormMixin):
     model = Card
     success_url = reverse_lazy('cards')
     form_class = CardStatusUpForm
     template_name = 'cards.html'
 
 
-class StatusDownView(LoginRequiredMixin, AddRequestInFormMixin):
+class StatusDownView(LoginRequiredMixin, AddUserInFormMixin):
     model = Card
     success_url = reverse_lazy('cards')
     form_class = CardStatusDownForm

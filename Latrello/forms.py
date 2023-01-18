@@ -26,13 +26,15 @@ class CreateUserForm(UserCreationForm):
 
 class CardCreateForm(forms.ModelForm):
     text = forms.TextInput()
+
     class Meta:
         model = Card
         fields = ['text']
 
 
 class CardUpdateForm(forms.ModelForm):
-    executor = forms.ModelChoiceField(queryset=User.objects.all(), blank=True, required=False, label='Исполнитель') #.all()-->.none() --->>41-42 not#
+    executor = forms.ModelChoiceField(queryset=User.objects.all(), blank=True, required=False,
+                                      label='Исполнитель')  # .all()-->.none() --->>41-42 not#
 
     def __init__(self, *args, **kwargs):
         user = kwargs.pop('user', None)
@@ -41,7 +43,6 @@ class CardUpdateForm(forms.ModelForm):
             self.fields['executor'].queryset = User.objects.filter(id=user.id)
         # else:
         #     self.fields['executor'].queryset = User.objects.all()
-
 
     class Meta:
         model = Card
@@ -62,8 +63,8 @@ class CardStatusUpForm(forms.ModelForm):
         instance = super().save(commit=False)
         user = self.user
         if user and user.is_authenticated and \
-           (not user.is_superuser and instance.author == instance.executor and instance.status < 4 or
-            user.is_superuser and instance.status == 4):
+                (not user.is_superuser and instance.author == instance.executor and
+                 instance.status < 4 or user.is_superuser and instance.status == 4):
             instance.status = F('status') + 1
         if commit:
             instance.save()
@@ -85,12 +86,11 @@ class CardStatusDownForm(forms.ModelForm):
         instance = super().save(commit=False)
         user = self.user
         if user and user.is_authenticated and \
-                (not user.is_superuser and instance.author == instance.executor and \
-                 instance.status > 1 and instance.status != 5 or user.is_superuser and instance.status == 5):
+                (not user.is_superuser and instance.author == instance.executor and
+                 instance.status > 1 and instance.status != 5 or
+                 user.is_superuser and instance.status == 5):
             instance.status = F('status') - 1
         if commit:
             instance.save()
             self.save_m2m()
         return instance
-
-
