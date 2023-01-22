@@ -12,9 +12,9 @@ class TokenExpiredAuthentication(TokenAuthentication):
             user, token = authenticate
         else:
             return authenticate
-        # if (timezone.now() - token.created).seconds > settings.TOKEN_LIFE:
-        #     token.delete()
-        #
-        #     msg = "Your Token has died, please generate a new one!"
-        #     raise exceptions.AuthenticationFailed(msg)
+        if (timezone.now() - token.created).seconds > settings.TOKEN_LIFE:
+            token.delete()
+
+            msg = "Your Token has died, please generate a new one!"
+            raise exceptions.AuthenticationFailed(msg)
         return user, token
