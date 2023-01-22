@@ -34,15 +34,13 @@ class CardCreateForm(forms.ModelForm):
 
 class CardUpdateForm(forms.ModelForm):
     executor = forms.ModelChoiceField(queryset=User.objects.all(), blank=True, required=False,
-                                      label='Исполнитель')  # .all()-->.none() --->>41-42 not#
+                                      label='Исполнитель')
 
     def __init__(self, *args, **kwargs):
         user = kwargs.pop('user', None)
         super(CardUpdateForm, self).__init__(*args, **kwargs)
         if user and user.is_authenticated and not user.is_superuser:
             self.fields['executor'].queryset = User.objects.filter(id=user.id)
-        # else:
-        #     self.fields['executor'].queryset = User.objects.all()
 
     class Meta:
         model = Card

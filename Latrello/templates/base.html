@@ -15,7 +15,15 @@
         {% if user.is_authenticated %}
             <div><a href="{% url 'home' %}">Home</a></div>
             <div><a href="{% url 'logout' %}">Logout</a></div>
-            <div><a href="{% url 'cards' %}">My Cards</a></div>
+            <div>
+                <a href="{% url 'cards' %}">
+                    {% if not user.is_superuser %}
+                        My Cards
+                    {% else %}
+                        All Cards
+                    {% endif %}
+                </a>
+            </div>
 
             <div>
                 <h2>

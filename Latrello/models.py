@@ -1,7 +1,7 @@
 from django.contrib.auth.models import User
 from django.db import models
 
-TYPE = (
+TYPE_STATUS = (
     (1, 'New'),
     (2, 'In Progress'),
     (3, 'In QA'),
@@ -12,7 +12,7 @@ TYPE = (
 
 class Card(models.Model):
     text = models.TextField()
-    status = models.IntegerField(choices=TYPE, default=1)
+    status = models.IntegerField(choices=TYPE_STATUS, default=1)
     date_create = models.DateTimeField(auto_now_add=True)
     date_update = models.DateTimeField(auto_now=True)
     author = models.ForeignKey(User, related_name='authors_cards', verbose_name='Автор', on_delete=models.CASCADE)

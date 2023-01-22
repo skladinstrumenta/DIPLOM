@@ -1,18 +1,18 @@
-from types import NoneType
-
 from django.contrib.auth.models import User
-from rest_framework import generics, viewsets, permissions
-from rest_framework.decorators import action
-from rest_framework.response import Response
+from rest_framework import generics, viewsets, permissions, exceptions
 
 from Latrello.api.permissions import IsOwnerOrSuperuser
-from Latrello.api.serializers import CardSerializer
+from Latrello.api.serializers import CardSerializer, UpdateStatusCardSerializer
 from Latrello.models import Card
+from rest_framework.filters import SearchFilter, OrderingFilter
 
 
 class CardListAPIView(generics.ListCreateAPIView):
     serializer_class = CardSerializer
-    # permission_classes = [permissions.IsAuthenticated]
+    filter_backends = [SearchFilter, OrderingFilter]
+    search_fields = ['=status']
+    permission_classes = [permissions.IsAuthenticated]
+
 
     def get_queryset(self):
         queryset = Card.objects.all()
@@ -22,49 +22,45 @@ class CardListAPIView(generics.ListCreateAPIView):
             return queryset
         return queryset
 
+class CardDetailAPIView(generics.RetrieveAPIView):
+    queryset = Card.objects.all()
+    serializer_class = CardSerializer
+    permission_classes = [permissions.IsAuthenticated, IsOwnerOrSuperuser]
+
 
 class CardUpdateAPIView(generics.RetrieveUpdateAPIView):
     queryset = Card.objects.all()
     serializer_class = CardSerializer
-    # permission_classes = [permissions.IsAuthenticated, IsOwnerOrSuperuser]
+    permission_classes = [permissions.IsAuthenticated, IsOwnerOrSuperuser]
 
 
 class CardDeleteAPIView(generics.RetrieveDestroyAPIView):
     queryset = Card.objects.all()
     serializer_class = CardSerializer
-    # permission_classes = (permissions.IsAuthenticated, permissions.IsAdminUser)
-#
-#
-# class StatusCardUpView(generics.RetrieveUpdateAPIView):
-#     pass
+    permission_classes = [permissions.IsAdminUser]
 
 
-# class CardViewSet(viewsets.ModelViewSet):
-#     queryset = Card.objects.all()
-#     serializer_class = CardSerializer
+class StatusUpdateAPIView(generics.RetrieveUpdateAPIView):
+    queryset = Card.objects.all()
+    serializer_class = UpdateStatusCardSerializer
+    permission_classes = [permissions.IsAuthenticated]
 
+    def perform_update(self, serializer):
+        user = self.request.user
+        obj = self.get_object()
+        status = obj.status
+        request_url = str(serializer.context['request'])
+        if user and user.is_authenticated:
+            if 'status-up' in request_url:
+                if not user.is_superuser and obj.author == obj.executor and 4 > obj.status >= 1 or \
+                        user.is_superuser and obj.status == 4:
+                    status += 1
 
-    # @action(methods=['get'], detail=False)
-    # def status_new(self, request, pk=None):
-    #     aut = Card.objects.filter(status=1)
-    #     return Response({'aut': [[a.text, a.author.username, a.date_update] for a in aut]})
-    #
-    # @action(methods=['get'], detail=False)
-    # def status_process(self, request):
-    #     aut = Card.objects.filter(status=2)
-    #     return Response({'aut': [(a.text, a.author, a.date_create) for a in aut]})
-    #
-    # @action(methods=['get'], detail=False)
-    # def status_in_qa(self, request):
-    #     aut = Card.objects.filter(status=3)
-    #     return Response({'aut': [[a.text, a.author.username, a.executor.username, a.date_update] for a in aut]})
-    #
-    # @action(methods=['get'], detail=False)
-    # def status_ready(self, request):
-    #     aut = Card.objects.filter(status=4)
-    #     return Response({'aut': [a.text for a in aut]})
-    #
-    # @action(methods=['get'], detail=False)
-    # def status_done(self, request):
-    #     aut = Card.objects.filter(status=5)
-    #     return Response({'aut': [a.text for a in aut]})
+            elif 'status-down' in request_url:
+                if not user.is_superuser and obj.author == obj.executor and 4 >= obj.status > 1 or \
+                        user.is_superuser and obj.status == 5:
+                    status -= 1
+            serializer.save(status=status)
+        else:
+            serializer.save()
+
