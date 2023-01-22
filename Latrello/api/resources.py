@@ -1,5 +1,4 @@
-from django.contrib.auth.models import User
-from rest_framework import generics, viewsets, permissions, exceptions
+from rest_framework import generics, permissions, exceptions
 
 from Latrello.api.permissions import IsOwnerOrSuperuser
 from Latrello.api.serializers import CardSerializer, UpdateStatusCardSerializer
@@ -13,7 +12,6 @@ class CardListAPIView(generics.ListCreateAPIView):
     search_fields = ['=status']
     permission_classes = [permissions.IsAuthenticated]
 
-
     def get_queryset(self):
         queryset = Card.objects.all()
         user = self.request.user
@@ -21,6 +19,7 @@ class CardListAPIView(generics.ListCreateAPIView):
             queryset = Card.objects.filter(author=user)
             return queryset
         return queryset
+
 
 class CardDetailAPIView(generics.RetrieveAPIView):
     queryset = Card.objects.all()
