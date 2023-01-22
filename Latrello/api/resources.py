@@ -1,3 +1,4 @@
+from django.contrib.auth.models import User
 from rest_framework import generics, permissions, exceptions
 
 from Latrello.api.permissions import IsOwnerOrSuperuser
@@ -32,6 +33,39 @@ class CardUpdateAPIView(generics.RetrieveUpdateAPIView):
     serializer_class = CardSerializer
     permission_classes = [permissions.IsAuthenticated, IsOwnerOrSuperuser]
 
+    def perform_update(self, serializer):
+        obj = self.get_object()
+        user = self.request.user
+        input_executor = (serializer.validated_data.get('executor')).title()
+        list_of_names = [name.username for name in User.objects.all()]
+        if input_executor != 'null'.title():
+
+            try:
+                validated_executors = User.objects.get(username=input_executor)
+                validated_executors_id = validated_executors.id
+            except:
+                if user.is_superuser:
+                    msg_not_name = f"There is no executor with this name in the database! Please enter another name! " \
+                               f"Now the database has such names: {list_of_names}"
+                else:
+                    msg_not_name = f"You can't choose anyone but yourself as the executor. Please enter name '{user}'"
+                raise exceptions.APIException(msg_not_name)
+
+            if user and user.is_authenticated:
+                if not user.is_superuser and user == obj.author:
+                    if validated_executors_id == user.id:
+                        serializer.save(executor=validated_executors)
+                    else:
+                        msg = f"You are is not SUPERUSER and can't choose anyone but yourself as the executor. " \
+                              f"Please enter name '{user}'"
+                        raise exceptions.APIException(msg)
+                elif user.is_superuser:
+                    serializer.save(executor=validated_executors)
+
+        else:
+            msg_null = 'There is no executor with this name in the database! Please enter another name!'
+            raise exceptions.APIException(msg_null)
+
 
 class CardDeleteAPIView(generics.RetrieveDestroyAPIView):
     queryset = Card.objects.all()
@@ -62,4 +96,3 @@ class StatusUpdateAPIView(generics.RetrieveUpdateAPIView):
             serializer.save(status=status)
         else:
             serializer.save()
-
