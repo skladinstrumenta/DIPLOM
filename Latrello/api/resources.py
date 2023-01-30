@@ -36,14 +36,14 @@ class CardUpdateAPIView(generics.RetrieveUpdateAPIView):
     def perform_update(self, serializer):
         obj = self.get_object()
         user = self.request.user
-        input_executor = (serializer.validated_data.get('executor')).title()
+        input_executor = serializer.validated_data.get('executor')
         list_of_names = [name.username for name in User.objects.all()]
-        if input_executor != 'null'.title():
+        if input_executor != 'null':
 
             try:
                 validated_executors = User.objects.get(username=input_executor)
                 validated_executors_id = validated_executors.id
-            except:
+            except (User.DoesNotExist, User.MultipleObjectsReturned):
                 if user.is_superuser:
                     msg_not_name = f"There is no executor with this name in the database! Please enter another name! " \
                                f"Now the database has such names: {list_of_names}"
