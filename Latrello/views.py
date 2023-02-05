@@ -46,7 +46,6 @@ class CardListView(LoginRequiredMixin, ListView):
     model = Card
     template_name = 'cards.html'
     extra_context = {'form': CardCreateForm}
-    login_url = '/'
 
     def get_queryset(self):
         if not self.request.user.is_superuser:

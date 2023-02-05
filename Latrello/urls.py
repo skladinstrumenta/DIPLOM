@@ -11,10 +11,10 @@ urlpatterns = [
     path('register/', CreateNewUserView.as_view(), name='register'),
     path('cards/', CardListView.as_view(), name='cards'),
     path('cards/new/', CardCreateView.as_view(), name='createcard'),
-    path('cards/update/<int:pk>', CardUpdateView.as_view(), name='updatecard'),
-    path('cards/delete/<int:pk>', CardDeleteView.as_view(), name='deletecard'),
-    path('cards/statusup/<int:pk>', StatusUpView.as_view(), name='status_up'),
-    path('cards/statusdown/<int:pk>', StatusDownView.as_view(), name='status_down'),
+    path('cards/update/<int:pk>/', CardUpdateView.as_view(), name='updatecard'),
+    path('cards/delete/<int:pk>/', CardDeleteView.as_view(), name='deletecard'),
+    path('cards/statusup/<int:pk>/', StatusUpView.as_view(), name='status_up'),
+    path('cards/statusdown/<int:pk>/', StatusDownView.as_view(), name='status_down'),
 
 
 ]

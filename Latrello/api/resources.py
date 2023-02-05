@@ -2,12 +2,12 @@ from django.contrib.auth.models import User
 from rest_framework import generics, permissions, exceptions
 
 from Latrello.api.permissions import IsOwnerOrSuperuser
-from Latrello.api.serializers import CardSerializer, UpdateStatusCardSerializer
+from Latrello.api.serializers import CardSerializer, UpdateStatusCardSerializer, CardCreateSerializer
 from Latrello.models import Card
 from rest_framework.filters import SearchFilter, OrderingFilter
 
 
-class CardListAPIView(generics.ListCreateAPIView):
+class CardListAPIView(generics.ListAPIView):
     serializer_class = CardSerializer
     filter_backends = [SearchFilter, OrderingFilter]
     search_fields = ['=status']
@@ -20,6 +20,12 @@ class CardListAPIView(generics.ListCreateAPIView):
             queryset = Card.objects.filter(author=user)
             return queryset
         return queryset
+
+
+class CardCreateAPIView(generics.CreateAPIView):
+    queryset = Card.objects.all()
+    serializer_class = CardCreateSerializer
+    permission_classes = [permissions.IsAuthenticated]
 
 
 class CardDetailAPIView(generics.RetrieveAPIView):
@@ -36,35 +42,58 @@ class CardUpdateAPIView(generics.RetrieveUpdateAPIView):
     def perform_update(self, serializer):
         obj = self.get_object()
         user = self.request.user
-        input_executor = serializer.validated_data.get('executor')
-        list_of_names = [name.username for name in User.objects.all()]
-        if input_executor != 'null':
 
-            try:
-                validated_executors = User.objects.get(username=input_executor)
-                validated_executors_id = validated_executors.id
-            except (User.DoesNotExist, User.MultipleObjectsReturned):
-                if user.is_superuser:
-                    msg_not_name = f"There is no executor with this name in the database! Please enter another name! " \
-                               f"Now the database has such names: {list_of_names}"
-                else:
-                    msg_not_name = f"You can't choose anyone but yourself as the executor. Please enter name '{user}'"
-                raise exceptions.APIException(msg_not_name)
+        if 'executor' in serializer.validated_data:
+            executor = serializer.validated_data['executor']
 
-            if user and user.is_authenticated:
-                if not user.is_superuser and user == obj.author:
-                    if validated_executors_id == user.id:
-                        serializer.save(executor=validated_executors)
+            if executor == 'null':
+                serializer.save(executor=None)
+
+            else:
+                executor_obj = User.objects.get(username=executor)
+                if not user.is_superuser:
+                    if user == obj.author == executor_obj:
+                        serializer.save(executor=executor_obj)
                     else:
                         msg = f"You are is not SUPERUSER and can't choose anyone but yourself as the executor. " \
-                              f"Please enter name '{user}'"
+                                  f"Please enter name '{user}'"
                         raise exceptions.APIException(msg)
-                elif user.is_superuser:
-                    serializer.save(executor=validated_executors)
+                else:
+                    serializer.save(executor=executor_obj)
 
         else:
-            msg_null = 'There is no executor with this name in the database! Please enter another name!'
-            raise exceptions.APIException(msg_null)
+            serializer.save()
+        # obj = self.get_object()
+        # user = self.request.user
+        # input_executor = serializer.validated_data.get('executor')
+        # list_of_names = [name.username for name in User.objects.all()]
+        # if input_executor != 'null':
+        #
+        #     try:
+        #         validated_executors = User.objects.get(username=input_executor)
+        #         validated_executors_id = validated_executors.id
+        #     except (User.DoesNotExist, User.MultipleObjectsReturned):
+        #         if user.is_superuser:
+        #             msg_not_name = f"There is no executor with this name in the database! Please enter another name! " \
+        #                        f"Now the database has such names: {list_of_names}"
+        #         else:
+        #             msg_not_name = f"You can't choose anyone but yourself as the executor. Please enter name '{user}'"
+        #         raise exceptions.APIException(msg_not_name)
+        #
+        #     if user and user.is_authenticated:
+        #         if not user.is_superuser and user == obj.author:
+        #             if validated_executors_id == user.id:
+        #                 serializer.save(executor=validated_executors)
+        #             else:
+        #                 msg = f"You are is not SUPERUSER and can't choose anyone but yourself as the executor. " \
+        #                       f"Please enter name '{user}'"
+        #                 raise exceptions.APIException(msg)
+        #         elif user.is_superuser:
+        #             serializer.save(executor=validated_executors)
+        #
+        # else:
+        #     msg_null = 'There is no executor with this name in the database! Please enter another name!'
+        #     raise exceptions.APIException(msg_null)
 
 
 class CardDeleteAPIView(generics.RetrieveDestroyAPIView):
