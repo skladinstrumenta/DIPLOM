@@ -22,5 +22,4 @@ class TokenExpiredAuthentication(TokenAuthentication):
             elif (timezone.now() - token.created).seconds <= settings.TOKEN_LIFE:
                 token.created = timezone.now()
                 token.save()
-                print("created NOW ---", token.created)
         return user, token

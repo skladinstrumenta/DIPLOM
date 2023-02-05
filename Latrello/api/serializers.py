@@ -15,7 +15,6 @@ class CardSerializer(serializers.ModelSerializer):
         fields = ['id', 'status', 'text', 'author', 'author_id', 'executor', 'date_update']
 
     def validate(self, data):
-        print(data)
         if 'executor' in data:
             if data['executor'] == 'null':
                 return data
