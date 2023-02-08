@@ -50,15 +50,16 @@ class CardUpdateAPIView(generics.RetrieveUpdateAPIView):
                 serializer.save(executor=None)
 
             else:
+                executor_obj = User.objects.get(username=executor)
                 if not user.is_superuser:
-                    if user == obj.author == executor:
-                        serializer.save(executor=executor)
+                    if user == obj.author == executor_obj:
+                        serializer.save(executor=executor_obj)
                     else:
                         msg = f"You are is not SUPERUSER and can't choose anyone but yourself as the executor. " \
                                   f"Please enter name '{user}' or 'null'"
                         raise exceptions.PermissionDenied(msg)
                 else:
-                    serializer.save(executor=executor)
+                    serializer.save(executor=executor_obj)
 
         else:
             serializer.save()
