@@ -58,7 +58,7 @@ class CardUpdateAPIView(generics.RetrieveUpdateAPIView):
                                   f"Please enter name '{user}' or 'null'"
                         raise exceptions.PermissionDenied(msg)
                 else:
-                    serializer.save(executor=executor_obj)
+                    serializer.save(executor=executor)
 
         else:
             serializer.save()
