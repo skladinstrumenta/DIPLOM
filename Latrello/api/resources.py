@@ -56,44 +56,13 @@ class CardUpdateAPIView(generics.RetrieveUpdateAPIView):
                         serializer.save(executor=executor_obj)
                     else:
                         msg = f"You are is not SUPERUSER and can't choose anyone but yourself as the executor. " \
-                                  f"Please enter name '{user}'"
-                        raise exceptions.APIException(msg)
+                                  f"Please enter name '{user}' or 'null'"
+                        raise exceptions.PermissionDenied(msg)
                 else:
                     serializer.save(executor=executor_obj)
 
         else:
             serializer.save()
-        # obj = self.get_object()
-        # user = self.request.user
-        # input_executor = serializer.validated_data.get('executor')
-        # list_of_names = [name.username for name in User.objects.all()]
-        # if input_executor != 'null':
-        #
-        #     try:
-        #         validated_executors = User.objects.get(username=input_executor)
-        #         validated_executors_id = validated_executors.id
-        #     except (User.DoesNotExist, User.MultipleObjectsReturned):
-        #         if user.is_superuser:
-        #             msg_not_name = f"There is no executor with this name in the database! Please enter another name! " \
-        #                        f"Now the database has such names: {list_of_names}"
-        #         else:
-        #             msg_not_name = f"You can't choose anyone but yourself as the executor. Please enter name '{user}'"
-        #         raise exceptions.APIException(msg_not_name)
-        #
-        #     if user and user.is_authenticated:
-        #         if not user.is_superuser and user == obj.author:
-        #             if validated_executors_id == user.id:
-        #                 serializer.save(executor=validated_executors)
-        #             else:
-        #                 msg = f"You are is not SUPERUSER and can't choose anyone but yourself as the executor. " \
-        #                       f"Please enter name '{user}'"
-        #                 raise exceptions.APIException(msg)
-        #         elif user.is_superuser:
-        #             serializer.save(executor=validated_executors)
-        #
-        # else:
-        #     msg_null = 'There is no executor with this name in the database! Please enter another name!'
-        #     raise exceptions.APIException(msg_null)
 
 
 class CardDeleteAPIView(generics.RetrieveDestroyAPIView):
@@ -112,16 +81,27 @@ class StatusUpdateAPIView(generics.RetrieveUpdateAPIView):
         obj = self.get_object()
         status = obj.status
         request_url = str(serializer.context['request'])
+
         if user and user.is_authenticated:
+
+            if not user.is_superuser and obj.author != obj.executor:
+                msg = "you do not have superuser rights, or the executor must be the same as the author!"
+                raise exceptions.PermissionDenied(msg)
+
             if 'status-up' in request_url:
+                if not user.is_superuser and obj.status == 4 or user.is_superuser and obj.status == 5:
+                    raise exceptions.ValidationError("You're can't status-up!")
                 if not user.is_superuser and obj.author == obj.executor and 4 > obj.status >= 1 or \
                         user.is_superuser and obj.status == 4:
                     status += 1
 
             elif 'status-down' in request_url:
+                if not user.is_superuser and obj.status == 1 or user.is_superuser and obj.status == 4:
+                    raise exceptions.ValidationError("You're can't status-down!")
                 if not user.is_superuser and obj.author == obj.executor and 4 >= obj.status > 1 or \
                         user.is_superuser and obj.status == 5:
                     status -= 1
             serializer.save(status=status)
+
         else:
             serializer.save()
