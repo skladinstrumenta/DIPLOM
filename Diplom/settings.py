@@ -145,5 +145,5 @@ REST_FRAMEWORK = {
     ]
 }
 
-TOKEN_LIFE = 60*5
+TOKEN_LIFE = 60*60
 
