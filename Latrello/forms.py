@@ -4,7 +4,7 @@ from django import forms
 from django.core.exceptions import ValidationError
 from django.db.models import F
 
-from Latrello.models import Card
+from Latrello.models import Card, TYPE_STATUS
 
 
 class CreateUserForm(UserCreationForm):
@@ -92,3 +92,10 @@ class CardStatusDownForm(forms.ModelForm):
             instance.save()
             self.save_m2m()
         return instance
+
+class SearchCardForm(forms.ModelForm):
+    status = forms.ChoiceField(choices=TYPE_STATUS, label='Filter status')
+
+    class Meta:
+        model = Card
+        fields = ['status']

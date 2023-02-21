@@ -116,3 +116,19 @@ h3 {
     font-size: 16px;
     margin-left: 3%;
 }
+
+.object_product.new {
+    border: 15px solid green;
+}
+.object_product.in_progress {
+    border: 15px solid lightgreen;
+}
+.object_product.in_qa {
+    border: 15px solid yellow;
+}
+.object_product.ready {
+    border: 15px solid hotpink;
+}
+.object_product.done {
+    border: 15px solid red;
+}
