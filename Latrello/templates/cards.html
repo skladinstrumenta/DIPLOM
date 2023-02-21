@@ -1,44 +1,73 @@
 {% extends 'base.html' %}
 {% block content %}
     <div class="product">
+        <form method="get" action="{% url 'cards_search' %}" class="create_card_text">
+            {{ form2.as_p }}
+            <button type="submit">FILTER</button>
+        </form>
+
         <form method="post" action="{% url 'createcard' %}" class="create_card_text">
             {% csrf_token %}
             {{ form.as_p }}
             <button type="submit">Create</button>
         </form>
-            {% for obj in object_list %}
-                <div class="object_product">
-                    <div class="product_description">
-                        <h3>{{ obj.text }}</h3>
-                        <h5>Последнее обновление было - {{ obj.date_update }} {{ obj.id }}</h5>
-                        {% if user.is_authenticated %}
-                            <form method="get" action="{% url 'updatecard' obj.id %}" class="update_button">
+
+        {% for obj in object_list %}
+            <div class="object_product" data-status = {{ obj.status }}>
+                <div class="product_description">
+                    <h3>{{ obj.text }}</h3>
+                    <h5>Последнее обновление было - {{ obj.date_update }} {{ obj.id }}</h5>
+                    {% if user.is_authenticated %}
+                        <form method="get" action="{% url 'updatecard' obj.id %}" class="update_button">
+                            {% csrf_token %}
+                            <button type="submit">Update</button>
+                        </form>
+                        {% if not user.is_superuser and obj.status > 1 and obj.status != 5 or user.is_superuser and obj.status == 5 %}
+                            <form method="post" action="{% url 'status_down' obj.id %}">
                                 {% csrf_token %}
-                                <button type="submit">Update</button>
+                                <button type="submit">STATUS DOWN</button>
                             </form>
-                            {% if not user.is_superuser and obj.status > 1 and obj.status != 5 or user.is_superuser and obj.status == 5 %}
-                                <form method="post" action="{% url 'status_down' obj.id %}">
-                                    {% csrf_token %}
-                                    <button type="submit">STATUS DOWN</button>
-                                </form>
-                            {% endif %}
-                            {% if not user.is_superuser and obj.status < 4 or user.is_superuser and obj.status == 4%}
-                                <form method="post" action="{% url 'status_up' obj.id %}">
-                                    {% csrf_token %}
-                                    <button type="submit">STATUS UP</button>
-                                </form>
-                            {% endif %}
-                            <h3>STATUS NOW - {{ obj.status }}</h3>
-                            {% if user.is_superuser %}
-                                <form method="Post" action="{% url 'deletecard' obj.id %}">
-                                    {% csrf_token %}
-                                    <button type="submit">Delete</button>
-                                </form>
-                            {% endif %}
                         {% endif %}
-                    </div>
-                </div><br>
-            {% endfor %}
-            <br>
+                        {% if not user.is_superuser and obj.status < 4 or user.is_superuser and obj.status == 4%}
+                            <form method="post" action="{% url 'status_up' obj.id %}">
+                                {% csrf_token %}
+                                <button type="submit">STATUS UP</button>
+                            </form>
+                        {% endif %}
+                        <h3>STATUS NOW - {{ obj.status }}</h3>
+                        {% if user.is_superuser %}
+                            <form method="Post" action="{% url 'deletecard' obj.id %}">
+                                {% csrf_token %}
+                                <button type="submit">Delete</button>
+                            </form>
+                        {% endif %}
+                    {% endif %}
+                </div>
+            </div><br>
+        {% endfor %}
+        <br>
     </div>
 {% endblock %}
+
+{% block script %}
+
+    <script>
+        let choose_status = {
+            1: 'new',
+            2: 'in_progress',
+            3: 'in_qa',
+            4: 'ready',
+            5: 'done'
+            }
+        let object_products = document.querySelectorAll('.object_product')
+
+        for (let i = 0; i < object_products.length; i++){
+            let status = choose_status[object_products[i].dataset['status']]
+            console.log(status)
+            object_products[i].classList.add(status)
+        }
+
+    </script>
+
+{% endblock %}
+

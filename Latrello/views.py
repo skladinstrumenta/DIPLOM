@@ -4,7 +4,8 @@ from django.shortcuts import redirect
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, ListView, UpdateView, DeleteView, TemplateView
 
-from Latrello.forms import CreateUserForm, CardCreateForm, CardUpdateForm, CardStatusUpForm, CardStatusDownForm
+from Latrello.forms import CreateUserForm, CardCreateForm, CardUpdateForm, CardStatusUpForm, CardStatusDownForm, \
+    SearchCardForm
 from Latrello.models import Card
 
 
@@ -45,13 +46,27 @@ class CreateNewUserView(CreateView):
 class CardListView(LoginRequiredMixin, ListView):
     model = Card
     template_name = 'cards.html'
-    extra_context = {'form': CardCreateForm}
+    extra_context = {'form': CardCreateForm, 'form2': SearchCardForm}
 
     def get_queryset(self):
         if not self.request.user.is_superuser:
             queryset = Card.objects.filter(author=self.request.user)
             return queryset
         queryset = Card.objects.all()
+        return queryset
+
+
+class CardSearchListView(LoginRequiredMixin, ListView):
+    model = Card
+    template_name = 'cardssearch.html'
+    extra_context = {'form2': SearchCardForm}
+
+    def get_queryset(self):
+        status = self.request.GET['status']
+        if not self.request.user.is_superuser:
+            queryset = Card.objects.filter(author=self.request.user, status=status)
+            return queryset
+        queryset = Card.objects.filter(status=status)
         return queryset
 
 

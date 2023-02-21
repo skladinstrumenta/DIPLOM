@@ -1,6 +1,6 @@
 body{
     /*background-color: #dad8d8;*/
-    color: #000;
+    color: snow;
     background-image: url("https://gamerwall.pro/uploads/posts/2021-11/1637220696_3-gamerwall-pro-p-derevyannii-parket-tekstura-oboi-na-zastav-3.jpg");
     /*background-image: url("https://img3.akspic.ru/crops/0/4/8/2/32840/32840-bumaga-pol-derevyannyj_nastil-drevesina-parket-1920x1080.jpg");*/
 }
@@ -116,19 +116,24 @@ h3 {
     font-size: 16px;
     margin-left: 3%;
 }
+.create_card_text p > select {
+    height: 25px;
+    border-radius: 5px;
+    width: 50%;
+}
 
 .object_product.new {
-    border: 15px solid green;
+    border: 10px solid blue;
 }
 .object_product.in_progress {
-    border: 15px solid lightgreen;
+    border: 10px solid green;
 }
 .object_product.in_qa {
-    border: 15px solid yellow;
+    border: 10px solid yellow;
 }
 .object_product.ready {
-    border: 15px solid hotpink;
+    border: 10px solid hotpink;
 }
 .object_product.done {
-    border: 15px solid red;
+    border: 10px solid red;
 }
